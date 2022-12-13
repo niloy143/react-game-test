@@ -1,8 +1,20 @@
+import { useState } from "react";
+
 function App() {
+
+  const [start, setStart] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   const startGame = e => {
     e.preventDefault();
+    setStart(true);
+    setCompleted(false);
+    e.target.reset();
 
+    setInterval(() => {
+      setCompleted(true);
+      setStart(false);
+    }, 1000);
   }
 
   return (
@@ -14,7 +26,7 @@ function App() {
           <div className="form-control w-full">
             <div className="input-group w-full">
               <input type="text" placeholder="Enter your name" className="input input-bordered w-full" required />
-              <button className="btn">Start</button>
+              <button className="btn" disabled={start}>Start</button>
             </div>
           </div>
         </form>
@@ -22,26 +34,27 @@ function App() {
         {/* =========== Part 2 ============ */}
         <div className="flex flex-col gap-5 pt-5">
           <div className="h-[300px] flex justify-center items-center border border-gray-500/50 rounded-xl p-8">
-            <>
-              <div className="text-center">
-                <h5>Your Score</h5>
-                <h3 className="text-7xl"> 0</h3>
-              </div>
-            </>
-            {/* <>
-              <div className="flex flex-col items-center">
-                <h5>Remaining time for this step: 00:000 ms</h5>
-                <h5 className="text-[100px] font-bold">0 + 0</h5>
-                <form onSubmit={startGame}>
-                  <div className="form-control">
-                    <div className="input-group">
-                      <input type="text" placeholder="Your answer" className="input input-bordered" required />
-                      <button className="btn">Submit</button>
-                    </div>
+            {
+              !start && !completed ?
+                <p>Enter your name to start the game</p>
+                : !completed ?
+                  <div className="flex flex-col items-center">
+                    <h5>Remaining time for this step: 00:000 ms</h5>
+                    <h5 className="text-[100px] font-bold">0 + 0</h5>
+                    <form onSubmit={startGame}>
+                      <div className="form-control">
+                        <div className="input-group">
+                          <input type="text" placeholder="Your answer" className="input input-bordered" required />
+                          <button className="btn">Submit</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div> :
+                  <div className="text-center">
+                    <h5>Your Score</h5>
+                    <h3 className="text-7xl"> 0</h3>
                   </div>
-                </form>
-              </div>
-            </> */}
+            }
           </div>
           <ul className="steps">
             <li className="step">step 1</li>
