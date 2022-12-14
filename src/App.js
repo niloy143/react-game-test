@@ -1,8 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 const genNum = () => parseInt(Math.random() * 100);
 
 function App() {
+
+  const reducer = (state, action) => {
+    if (action.type === 'ANSWER') {
+      return { ...state, [action.step]: { ...(state[action.step]), answer: action.answer } };
+    }
+    else if (action.type === 'RIGHTANSWER') {
+      return { ...state, [action.step]: { ...(state[action.step]), rightAnswer: action.rightAnswer } }
+    }
+    else if (action.type === 'RESET') {
+      return {};
+    }
+    return { ...state }
+  }
 
   const [start, setStart] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -11,6 +24,16 @@ function App() {
   const [showRemaining, setShowRemaining] = useState(remaining);
   const [startShowRemaining, setStartShowRemaining] = useState(false);
   const [math, setMath] = useState(null);
+  const [state, dispatch] = useReducer(reducer, {});
+  const [calculateResult, setCalculateResult] = useState(false);
+
+  useEffect(() => {
+    if (Object.keys(state).length) {
+      console.log(state);
+      setCalculateResult(false);
+      dispatch({ type: 'RESET' });
+    }
+  }, [calculateResult])
 
   const startGame = e => {
     e.preventDefault();
@@ -24,19 +47,19 @@ function App() {
   }
 
   useEffect(() => {
-    if (step === 1 || step === 2) {
+    if (step === 0 || step === 1) {
       setRemaining(5000);
     }
-    else if (step === 3 || step === 4) {
+    else if (step === 2 || step === 3) {
       setRemaining(4000);
     }
-    else if (step === 5 || step === 6) {
+    else if (step === 4 || step === 5) {
       setRemaining(3000);
     }
-    else if (step === 7 || step === 8) {
+    else if (step === 6 || step === 7) {
       setRemaining(2000);
     }
-    else if (step === 9 || step === 10) {
+    else if (step === 8 || step === 9) {
       setRemaining(1000);
     }
 
@@ -49,11 +72,19 @@ function App() {
       setTimeout(() => {
         clearInterval(startShow);
         if (step < 10) {
-          console.log(math);
+
+          const nums = math.split(' + ');
+          const sum = Number(nums[0]) + Number(nums[1]);
+          dispatch({ type: 'RIGHTANSWER', step: `step-${step}`, rightAnswer: sum });
+
           setMath(`${genNum()} + ${genNum()}`);
           setStep(step + 1);
         }
         else if (step === 10) {
+          const nums = math.split(' + ');
+          const sum = Number(nums[0]) + Number(nums[1]);
+          dispatch({ type: 'RIGHTANSWER', step: `step-${step}`, rightAnswer: sum });
+          setCalculateResult(true);
           setStart(false);
           setRemaining(5000);
           setStartShowRemaining(false);
@@ -88,10 +119,14 @@ function App() {
                   <div className="flex flex-col items-center">
                     <h5>Remaining time for this step: {(showRemaining / 1000).toFixed(2)}</h5>
                     <h5 className="text-[100px] font-bold">{math}</h5>
-                    <form onSubmit={startGame}>
+                    <form onSubmit={e => {
+                      e.preventDefault();
+                      dispatch({ type: 'ANSWER', step: `step-${step}`, answer: Number(e.target.answer.value) });
+                      e.target.reset();
+                    }}>
                       <div className="form-control">
                         <div className="input-group">
-                          <input type="number" placeholder="Your answer" className="input input-bordered" required />
+                          <input type="number" placeholder="Your answer" name="answer" className="input input-bordered" required />
                           <button className="btn">Submit</button>
                         </div>
                       </div>
@@ -155,7 +190,7 @@ function App() {
         </div>
 
       </div>
-    </div>
+    </div >
   );
 }
 
