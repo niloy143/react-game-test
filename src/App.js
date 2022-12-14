@@ -1,6 +1,10 @@
 import { useEffect, useReducer, useState } from "react";
 
 const genNum = () => parseInt(Math.random() * 100);
+const setStat = information => {
+  const existingStats = JSON.parse(localStorage.getItem('gameStats')) || [];
+  localStorage.setItem('gameStats', JSON.stringify([...existingStats, information]));
+}
 
 function App() {
 
@@ -23,6 +27,15 @@ function App() {
   const [state, dispatch] = useReducer(reducer, {});
   const [calculateResult, setCalculateResult] = useState(false);
   const [player, setPlayer] = useState(null);
+  const [gameStats, setGameStats] = useState([]);
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    const storedStats = localStorage.getItem('gameStats');
+    if (storedStats) {
+      setGameStats(JSON.parse(storedStats));
+    }
+  }, [])
 
   useEffect(() => {
     if (Object.keys(state).length) {
@@ -78,7 +91,9 @@ function App() {
         score: Object.keys(state).map(step => state[step].point).reduce((a, b) => a + b, 0),
         stats: state
       }
-      console.log(information);
+      setStat(information);
+      setGameStats([...gameStats, information]);
+      setScore(information.score);
       setCalculateResult(false);
       setPlayer(null);
       dispatch({ type: 'RESET' });
@@ -184,7 +199,7 @@ function App() {
                   </div> :
                   <div className="text-center">
                     <h5>Your Score</h5>
-                    <h3 className="text-7xl"> 0</h3>
+                    <h3 className="text-7xl">{score}</h3>
                   </div>
             }
           </div>
@@ -203,41 +218,32 @@ function App() {
         </div>
 
         {/* =========== Part 3 ============ */}
-        <div className="w-full py-6">
-          <h3 className="text-3xl text-center mb-3">Game Stats</h3>
-          <div className="overflow-x-auto w-full border rounded-xl border-gray-500/50">
-            <table className="table w-full">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Player</th>
-                  <th>Score</th>
-                  <th>Completion Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>1</th>
-                  <td>Cy Ganderton</td>
-                  <td>Quality Control Specialist</td>
-                  <td>Blue</td>
-                </tr>
-                <tr className="active">
-                  <th>2</th>
-                  <td>Hart Hagerty</td>
-                  <td>Desktop Support Technician</td>
-                  <td>Purple</td>
-                </tr>
-                <tr>
-                  <th>3</th>
-                  <td>Brice Swyre</td>
-                  <td>Tax Accountant</td>
-                  <td>Red</td>
-                </tr>
-              </tbody>
-            </table>
+        {
+          !!gameStats.length &&
+          <div className="w-full py-6 mt-8">
+            <h3 className="text-3xl text-center mb-3">Game Stats</h3>
+            <div className="overflow-x-auto w-full border rounded-xl border-gray-500/50">
+              <table className="table w-full text-center">
+                <thead>
+                  <tr>
+                    <th>Position</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    gameStats.sort((a, b) => b.score - a.score).map(({ player, score }, i) => <tr key={i}>
+                      <th>{i + 1}</th>
+                      <td>{player}</td>
+                      <td>{score}</td>
+                    </tr>)
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        }
 
       </div>
     </div >
