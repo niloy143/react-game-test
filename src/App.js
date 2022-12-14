@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const genNum = () => parseInt(Math.random() * 100);
+
 function App() {
 
   const [start, setStart] = useState(false);
@@ -8,12 +10,14 @@ function App() {
   const [remaining, setRemaining] = useState(5000);
   const [showRemaining, setShowRemaining] = useState(remaining);
   const [startShowRemaining, setStartShowRemaining] = useState(false);
+  const [math, setMath] = useState(null);
 
   const startGame = e => {
     e.preventDefault();
     setStart(true);
     setCompleted(false);
     setStartShowRemaining(true);
+    setMath(`${genNum()} + ${genNum()}`);
     e.target.reset();
 
     setStep(step + 1);
@@ -45,6 +49,8 @@ function App() {
       setTimeout(() => {
         clearInterval(startShow);
         if (step < 10) {
+          console.log(math);
+          setMath(`${genNum()} + ${genNum()}`);
           setStep(step + 1);
         }
         else if (step === 10) {
@@ -56,7 +62,7 @@ function App() {
         }
       }, remaining);
     }
-  }, [remaining, step, startShowRemaining])
+  }, [step, startShowRemaining, math])
 
   return (
     <div className="w-screen h-screen overflow-x-hidden font-mono relative">
@@ -81,11 +87,11 @@ function App() {
                 : !completed ?
                   <div className="flex flex-col items-center">
                     <h5>Remaining time for this step: {(showRemaining / 1000).toFixed(2)}</h5>
-                    <h5 className="text-[100px] font-bold">0 + 0</h5>
+                    <h5 className="text-[100px] font-bold">{math}</h5>
                     <form onSubmit={startGame}>
                       <div className="form-control">
                         <div className="input-group">
-                          <input type="text" placeholder="Your answer" className="input input-bordered" required />
+                          <input type="number" placeholder="Your answer" className="input input-bordered" required />
                           <button className="btn">Submit</button>
                         </div>
                       </div>
