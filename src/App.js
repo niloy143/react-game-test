@@ -5,16 +5,12 @@ const genNum = () => parseInt(Math.random() * 100);
 function App() {
 
   const reducer = (state, action) => {
-    if (action.type === 'ANSWER') {
-      return { ...state, [action.step]: { ...(state[action.step]), answer: action.answer } };
+    switch (action.type) {
+      default: return { ...state };
+      case 'ANSWER': return { ...state, [action.step]: { ...(state[action.step]), answer: action.answer } };
+      case 'RIGHTANSWER': return { ...state, [action.step]: { ...(state[action.step]), rightAnswer: action.rightAnswer } };
+      case 'RESET': return {};
     }
-    else if (action.type === 'RIGHTANSWER') {
-      return { ...state, [action.step]: { ...(state[action.step]), rightAnswer: action.rightAnswer } }
-    }
-    else if (action.type === 'RESET') {
-      return {};
-    }
-    return { ...state }
   }
 
   const [start, setStart] = useState(false);
@@ -26,11 +22,65 @@ function App() {
   const [math, setMath] = useState(null);
   const [state, dispatch] = useReducer(reducer, {});
   const [calculateResult, setCalculateResult] = useState(false);
+  const [player, setPlayer] = useState(null);
 
   useEffect(() => {
     if (Object.keys(state).length) {
-      console.log(state);
+
+      for (const step in state) {
+        if (state[step].answer) {
+          if (state[step].answer === state[step].rightAnswer) {
+            switch (step) {
+              default: ; break;
+              case 'step-1':
+                state[step] = { ...state[step], point: 10 };
+                break;
+              case 'step-2':
+                state[step] = { ...state[step], point: 10 };
+                break;
+              case 'step-3':
+                state[step] = { ...state[step], point: 20 };
+                break;
+              case 'step-4':
+                state[step] = { ...state[step], point: 20 };
+                break;
+              case 'step-5':
+                state[step] = { ...state[step], point: 30 };
+                break;
+              case 'step-6':
+                state[step] = { ...state[step], point: 30 };
+                break;
+              case 'step-7':
+                state[step] = { ...state[step], point: 40 };
+                break;
+              case 'step-8':
+                state[step] = { ...state[step], point: 40 };
+                break;
+              case 'step-9':
+                state[step] = { ...state[step], point: 50 };
+                break;
+              case 'step-10':
+                state[step] = { ...state[step], point: 50 };
+                break;
+            }
+          }
+          else {
+            state[step] = { ...state[step], point: -5 };
+          }
+        }
+        else {
+          state[step] = { ...state[step], point: 0 };
+        }
+      }
+
+      const information = {
+        player,
+        score: Object.keys(state).map(step => state[step].point).reduce((a, b) => a + b, 0),
+        stats: state
+      }
+      console.log(information);
       setCalculateResult(false);
+      setPlayer(null);
       dispatch({ type: 'RESET' });
     }
   }, [calculateResult])
@@ -41,9 +91,9 @@ function App() {
     setCompleted(false);
     setStartShowRemaining(true);
     setMath(`${genNum()} + ${genNum()}`);
-    e.target.reset();
-
+    setPlayer(e.target.player.value);
     setStep(step + 1);
+    e.target.reset();
   }
 
   useEffect(() => {
@@ -103,7 +153,7 @@ function App() {
         <form onSubmit={startGame} className="w-full">
           <div className="form-control w-full">
             <div className="input-group w-full">
-              <input type="text" placeholder="Enter player name" className="input input-bordered w-full" required />
+              <input type="text" placeholder="Enter player name" name="player" className="input input-bordered w-full" required />
               <button className="btn" disabled={start}>Start</button>
             </div>
           </div>
